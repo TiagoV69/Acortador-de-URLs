@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.Optional;
 
+import jakarta.validation.Valid; 
 
 @RestController // cmbina @Controller y @ResponseBody. Indica que las respuestas serán JSON o XML, no vistas HTML.
 @RequestMapping("/") // Todas las rutas en este controlador empezarán con "/".
@@ -29,7 +30,7 @@ public class UrlController {
 
     // este endpoint para crear un enlace corto
     @PostMapping("/api/v1/shorten") // mapea peticiones POST a esta ruta.
-    public ResponseEntity<String> shortenUrl(@RequestBody ShortenRequest request) { // @RequestBody convierte el JSON de la petición a nuestro objeto DTO.
+    public ResponseEntity<String> shortenUrl(@Valid @RequestBody ShortenRequest request) { // @RequestBody convierte el JSON de la petición a nuestro objeto DTO.
         String shortCode = urlShorteningService.shortenUrl(request.getUrl());
 
         // Devolvemos el código corto en el cuerpo de la respuesta con un estado 201(CREATED).
