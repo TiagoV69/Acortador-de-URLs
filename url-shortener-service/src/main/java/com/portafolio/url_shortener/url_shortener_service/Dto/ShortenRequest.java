@@ -4,7 +4,6 @@ import org.hibernate.validator.constraints.URL;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
-import org.hibernate.validator.constraints.URL; // Importante hibernate-validator
 
 @Data // Lombok para getters y setters
 public class ShortenRequest {

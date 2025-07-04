@@ -1,17 +1,16 @@
 package com.portafolio.url_shortener.url_shortener_service.Controller;
 
 import com.portafolio.url_shortener.url_shortener_service.Dto.ShortenRequest;
+import com.portafolio.url_shortener.url_shortener_service.Exception.ResourceNotFoundException;
 import com.portafolio.url_shortener.url_shortener_service.Model.UrlMapping;
 import com.portafolio.url_shortener.url_shortener_service.Repository.UrlMappingRepository;
 import com.portafolio.url_shortener.url_shortener_service.Service.UrlShorteningService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Optional;
 
 import jakarta.validation.Valid; 
 
@@ -40,18 +39,13 @@ public class UrlController {
 
     // este endpoint redirige a la URL original
     @GetMapping("/{shortCode}") // mapea peticiones GET. {shortCode} es una variable en la ruta.
-    public ResponseEntity<Void> redirectToOriginalUrl(@PathVariable String shortCode) { // 8. @PathVariable extrae el valor de la variable de la ruta.
-        Optional<UrlMapping> urlMappingOptional = urlMappingRepository.findByShortCode(shortCode);
+    public ResponseEntity<Void> redirectToOriginalUrl(@PathVariable String shortCode) { 
+       String originalUrl = urlMappingRepository.findByShortCode(shortCode)
+            .map(UrlMapping::getOriginalUrl) // Si lo encuentra, extrae la URL original.
+            .orElseThrow(() -> new ResourceNotFoundException("No se encontró una URL para el código: " + shortCode)); // Si no, lanza nuestra excepción.
 
-        if (urlMappingOptional.isPresent()) {
-            String originalUrl = urlMappingOptional.get().getOriginalUrl();
-            // si encontramos la URL, creamos una respuesta de redirección (HTTP 302 Found).
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create(originalUrl)) // se añade la cabecera "Location" con la URL original.
-                    .build();
-        } else {
-            // si no lo encuentra devolvemos un 404(Not Found).
-            return ResponseEntity.notFound().build();
-        }
+    return ResponseEntity.status(HttpStatus.FOUND)
+            .location(URI.create(originalUrl))
+            .build();
     }
 }
